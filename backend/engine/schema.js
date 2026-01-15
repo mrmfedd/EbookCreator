@@ -20,6 +20,7 @@ const manuscriptSchema = {
       id: 'string',
       title: 'string',
       subtitle: 'string',
+      section: 'front | body | back',
       blocks: 'Block[]',
       order: 'number'
     }

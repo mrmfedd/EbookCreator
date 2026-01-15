@@ -566,30 +566,47 @@ function App() {
   // Organize chapters into Front Matter, Body Chapters, and Back Matter
   const organizeChapters = () => {
     if (!manuscript?.chapters) return { frontMatter: [], chapters: [], backMatter: [] }
-    
+
     const allChapters = manuscript.chapters
-    // For now, assume first chapter is front matter if it has a specific role/type
-    // and last chapter is back matter. In a real implementation, this would check chapter.type or chapter.role
     const frontMatter = []
     const chapters = []
     const backMatter = []
-    
+
     allChapters.forEach((chapter) => {
-      // Simple heuristic: if chapter title suggests front/back matter, categorize it
-      const titleLower = chapter.title?.toLowerCase() || ''
-      if (titleLower.includes('front matter') || titleLower.includes('title page') || 
-          titleLower.includes('copyright') || titleLower.includes('dedication') ||
-          titleLower.includes('table of contents') || titleLower.includes('preface')) {
+      if (chapter.section === 'front') {
         frontMatter.push(chapter)
-      } else if (titleLower.includes('back matter') || titleLower.includes('appendix') ||
-                 titleLower.includes('index') || titleLower.includes('glossary') ||
-                 titleLower.includes('bibliography') || titleLower.includes('about the author')) {
+        return
+      }
+      if (chapter.section === 'back') {
+        backMatter.push(chapter)
+        return
+      }
+
+      // Fallback heuristic for older imports without section
+      const titleLower = chapter.title?.toLowerCase() || ''
+      if (
+        titleLower.includes('front matter') ||
+        titleLower.includes('title page') ||
+        titleLower.includes('copyright') ||
+        titleLower.includes('dedication') ||
+        titleLower.includes('table of contents') ||
+        titleLower.includes('preface')
+      ) {
+        frontMatter.push(chapter)
+      } else if (
+        titleLower.includes('back matter') ||
+        titleLower.includes('appendix') ||
+        titleLower.includes('index') ||
+        titleLower.includes('glossary') ||
+        titleLower.includes('bibliography') ||
+        titleLower.includes('about the author')
+      ) {
         backMatter.push(chapter)
       } else {
         chapters.push(chapter)
       }
     })
-    
+
     return { frontMatter, chapters, backMatter }
   }
 

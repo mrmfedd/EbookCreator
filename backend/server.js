@@ -263,6 +263,7 @@ app.post('/api/engine/import/idml', (req, res) => {
       id: chapter.id,
       title: chapter.title,
       subtitle: '',
+      section: chapter.section || 'body',
       blocks: [],
       order: chapter.order
     }));

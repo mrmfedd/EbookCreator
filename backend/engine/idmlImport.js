@@ -173,6 +173,37 @@ const extractParagraphBlocks = (stories, paragraphStyleNameToId, logs) => {
   return blocks;
 };
 
+const classifyChapterSection = (title, styleName) => {
+  const combined = `${title || ''} ${styleName || ''}`.toLowerCase();
+  if (
+    combined.includes('front matter') ||
+    combined.includes('title page') ||
+    combined.includes('copyright') ||
+    combined.includes('dedication') ||
+    combined.includes('preface') ||
+    combined.includes('foreword') ||
+    combined.includes('acknowledg') ||
+    combined.includes('table of contents') ||
+    combined.includes('toc')
+  ) {
+    return 'front';
+  }
+  if (
+    combined.includes('back matter') ||
+    combined.includes('appendix') ||
+    combined.includes('index') ||
+    combined.includes('glossary') ||
+    combined.includes('bibliography') ||
+    combined.includes('afterword') ||
+    combined.includes('endnotes') ||
+    combined.includes('notes') ||
+    combined.includes('about the author')
+  ) {
+    return 'back';
+  }
+  return 'body';
+};
+
 const detectChapters = (stories) => {
   const chapters = [];
   let order = 1;
@@ -187,11 +218,13 @@ const detectChapters = (stories) => {
       const isChapterText = /^chapter\b/i.test(text);
       const pageBreak = hasPageBreak(range);
       if (isChapterStyle || isChapterText || (pageBreak && isHeading)) {
+        const section = classifyChapterSection(text, styleName);
         chapters.push({
           id: `chapter-${order}`,
           title: text || styleName || `Chapter ${order}`,
           styleName,
-          order
+          order,
+          section
         });
         order += 1;
       }
