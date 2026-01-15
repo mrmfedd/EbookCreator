@@ -55,7 +55,7 @@ html,body{margin:0;padding:0;}
 body{font-family:Georgia,serif;font-size:11pt;line-height:1.4;color:#111827;}
 section.chapter{page-break-before:always;}
 section.chapter:first-of-type{page-break-before:auto;}
-p{orphans:2;widows:2;}
+p{orphans:2;widows:2;text-align:justify;hyphens:auto;}
 `;
 };
 

@@ -37,6 +37,7 @@ nav.toc{border:1px solid #e5e7eb;border-radius:12px;padding:0.75rem 1rem;margin:
 nav.toc h2{margin:0 0 0.5rem;font-size:1rem;}
 nav.toc ol{margin:0;padding-left:1.25rem;}
 section.chapter{margin:1.25rem 0 2rem;}
+p{text-align:justify;hyphens:auto;}
 `;
 
   const paragraphCss = paragraph

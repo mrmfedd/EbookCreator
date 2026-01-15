@@ -316,6 +316,15 @@ app.get('/api/engine/manuscript/:id', (req, res) => {
   res.json({ manuscript });
 });
 
+app.patch('/api/engine/manuscript/:id', (req, res) => {
+  try {
+    const manuscript = engine.updateManuscript(req.params.id, req.body || {});
+    res.json({ manuscript });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 app.post('/api/engine/manuscript/:id/chapters', (req, res) => {
   try {
     const chapter = engine.addChapter(req.params.id, req.body || {});

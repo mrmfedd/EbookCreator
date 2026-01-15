@@ -43,6 +43,38 @@ function App() {
       .catch(() => {})
   }
 
+  const updateManuscriptLocal = (updates) => {
+    if (!manuscript) return
+    const next = {
+      ...manuscript,
+      ...updates,
+      metadata: {
+        ...(manuscript.metadata || {}),
+        ...(updates.metadata || {})
+      }
+    }
+    setManuscript(next)
+  }
+
+  const persistManuscript = async (updates) => {
+    if (!manuscript?.id) return
+    try {
+      const res = await fetch(`/api/engine/manuscript/${manuscript.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      })
+      const text = await res.text()
+      if (!res.ok) throw new Error(text || 'Update failed')
+      const data = text ? JSON.parse(text) : {}
+      if (data.manuscript) {
+        setManuscript(data.manuscript)
+      }
+    } catch (error) {
+      setEditorStatus(`Metadata update failed. ${error.message}`)
+    }
+  }
+
   useEffect(() => {
     let isMounted = true
     fetch('/api/health')
@@ -633,6 +665,49 @@ function App() {
       <div className="main-layout">
         {/* Sidebar */}
         <aside className="sidebar">
+          <div className="sidebar-section">
+            <div className="sidebar-section-header">Book Details</div>
+            <div className="book-details">
+              <label htmlFor="book-title">Book Title</label>
+              <input
+                id="book-title"
+                type="text"
+                value={manuscript?.title || ''}
+                placeholder="Untitled Book"
+                disabled={!manuscript}
+                onChange={(e) => updateManuscriptLocal({ title: e.target.value })}
+                onBlur={(e) => persistManuscript({ title: e.target.value })}
+              />
+              <label htmlFor="book-author">Author</label>
+              <input
+                id="book-author"
+                type="text"
+                value={manuscript?.metadata?.author || ''}
+                placeholder="Author name"
+                disabled={!manuscript}
+                onChange={(e) =>
+                  updateManuscriptLocal({ metadata: { author: e.target.value } })
+                }
+                onBlur={(e) =>
+                  persistManuscript({ metadata: { author: e.target.value } })
+                }
+              />
+              <label htmlFor="book-publisher">Publisher</label>
+              <input
+                id="book-publisher"
+                type="text"
+                value={manuscript?.metadata?.publisher || ''}
+                placeholder="Publisher"
+                disabled={!manuscript}
+                onChange={(e) =>
+                  updateManuscriptLocal({ metadata: { publisher: e.target.value } })
+                }
+                onBlur={(e) =>
+                  persistManuscript({ metadata: { publisher: e.target.value } })
+                }
+              />
+            </div>
+          </div>
           <div className="sidebar-section">
             <div className="sidebar-section-header">Front Matter</div>
             <ul className="sidebar-list">

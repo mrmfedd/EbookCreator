@@ -3,6 +3,7 @@ const manuscriptSchema = {
   title: 'string',
   metadata: {
     author: 'string',
+    publisher: 'string',
     language: 'string'
   },
   styleRegistryId: 'string',

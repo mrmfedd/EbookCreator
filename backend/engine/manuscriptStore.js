@@ -32,6 +32,7 @@ class ManuscriptStore {
       title,
       metadata: {
         author: metadata.author || '',
+        publisher: metadata.publisher || '',
         language: metadata.language || 'en'
       },
       styleRegistryId: styleRegistry.id,
@@ -40,6 +41,30 @@ class ManuscriptStore {
       backMatter: []
     };
     this.manuscripts.set(manuscriptId, manuscript);
+    return manuscript;
+  }
+
+  updateManuscript(manuscriptId, updates = {}) {
+    const manuscript = this.getManuscript(manuscriptId);
+    if (!manuscript) throw new Error('Manuscript not found');
+
+    if (Object.prototype.hasOwnProperty.call(updates, 'title')) {
+      manuscript.title = updates.title || '';
+    }
+
+    if (updates.metadata && typeof updates.metadata === 'object') {
+      manuscript.metadata = manuscript.metadata || {};
+      if (Object.prototype.hasOwnProperty.call(updates.metadata, 'author')) {
+        manuscript.metadata.author = updates.metadata.author || '';
+      }
+      if (Object.prototype.hasOwnProperty.call(updates.metadata, 'publisher')) {
+        manuscript.metadata.publisher = updates.metadata.publisher || '';
+      }
+      if (Object.prototype.hasOwnProperty.call(updates.metadata, 'language')) {
+        manuscript.metadata.language = updates.metadata.language || 'en';
+      }
+    }
+
     return manuscript;
   }
 

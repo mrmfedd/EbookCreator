@@ -178,6 +178,35 @@
   border-bottom: 1px solid #f3f4f6;
 }
 
+.book-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.book-details label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.book-details input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+  color: #111827;
+  background: #ffffff;
+}
+
+.book-details input:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
 .sidebar-list {
   list-style: none;
   padding: 0;
@@ -293,6 +322,8 @@
   font-family: inherit;
   font-size: 1rem;
   line-height: 1.6;
+  text-align: justify;
+  hyphens: auto;
   background: #fafafa;
   color: #111827;
   transition: all 0.2s;

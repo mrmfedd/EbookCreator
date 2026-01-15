@@ -125,6 +125,7 @@ const buildStylesCss = (styles) => {
 
   const base = `
 body{font-family:Georgia,serif;line-height:1.6;}
+p{margin:0 0 1em;text-align:justify;hyphens:auto;}
 section.chapter{page-break-before:always;}
 section.chapter:first-of-type{page-break-before:auto;}
 `;
@@ -166,6 +167,7 @@ const buildPackageOpf = ({ manuscript, toc }) => {
     <dc:title>${title}</dc:title>
     <dc:language>${lang}</dc:language>
     ${manuscript?.metadata?.author ? `<dc:creator>${escapeHtml(manuscript.metadata.author)}</dc:creator>` : ''}
+    ${manuscript?.metadata?.publisher ? `<dc:publisher>${escapeHtml(manuscript.metadata.publisher)}</dc:publisher>` : ''}
   </metadata>
   <manifest>
     <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>

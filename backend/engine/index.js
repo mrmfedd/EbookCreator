@@ -34,6 +34,8 @@ const updateStyle = (manuscriptId, styleId, updates) =>
   store.updateStyle(manuscriptId, styleId, updates);
 const updateBlock = (manuscriptId, chapterId, blockId, updates) =>
   store.updateBlock(manuscriptId, chapterId, blockId, updates);
+const updateManuscript = (manuscriptId, updates) =>
+  store.updateManuscript(manuscriptId, updates);
 
 module.exports = {
   schemas,
@@ -62,5 +64,6 @@ module.exports = {
   listStyles,
   addStyle,
   updateStyle,
-  updateBlock
+  updateBlock,
+  updateManuscript
 };
