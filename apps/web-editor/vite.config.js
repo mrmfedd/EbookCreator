@@ -6,8 +6,12 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api': 'http://localhost:5001'
+      '/api': process.env.VITE_API_URL || 'http://localhost:5001'
     }
+  },
+  define: {
+    // Make API URL available in client
+    'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || '')
   }
 })
 
