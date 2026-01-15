@@ -1,0 +1,41 @@
+/**
+ * Anointed Pages Publishing Branding
+ * "Where the Anointing Meets Excellence."
+ */
+
+:root {
+  /* Colors */
+  --color-primary: #4B2E83;      /* Deep Royal Purple */
+  --color-secondary: #C9A24D;    /* Antique Gold */
+  --color-background: #FAF7F2;  /* Warm Parchment */
+  --color-text: #1F1F1F;        /* Charcoal Black */
+  --color-accent: #7A1E2D;      /* Burgundy */
+
+  /* Typography */
+  --font-headings: "Playfair Display", "Libre Baskerville", serif;
+  --font-body: "Source Serif Pro", "EB Garamond", serif;
+  --font-ui: "Inter", "Lato", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-body);
+  background-color: var(--color-background);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headings);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* UI Tone: Elegant, minimal, seminary-grade, sacred but modern */
+

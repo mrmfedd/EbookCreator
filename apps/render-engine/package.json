@@ -1,0 +1,15 @@
+{
+  "name": "@anointed-pages/render-engine",
+  "version": "1.0.0",
+  "description": "Ebook + print renderer",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@anointed-pages/manuscript-core": "workspace:*",
+    "@anointed-pages/style-registry": "workspace:*"
+  }
+}
+

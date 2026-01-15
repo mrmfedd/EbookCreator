@@ -1,0 +1,16 @@
+{
+  "name": "@anointed-pages/ai-services",
+  "version": "1.0.0",
+  "description": "AI formatting & content tools",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "@anointed-pages/manuscript-core": "workspace:*",
+    "@anointed-pages/style-registry": "workspace:*",
+    "@anointed-pages/kdp-validator": "workspace:*"
+  }
+}
+

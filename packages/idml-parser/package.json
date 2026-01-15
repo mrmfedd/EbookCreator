@@ -1,0 +1,23 @@
+{
+  "name": "@anointed-pages/idml-parser",
+  "version": "1.0.0",
+  "description": "IDML import/export with round-trip support",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "idml",
+    "indesign",
+    "import",
+    "export"
+  ],
+  "author": "Anointed Pages Publishing",
+  "license": "ISC",
+  "dependencies": {
+    "adm-zip": "^0.5.10",
+    "fast-xml-parser": "^4.3.2"
+  }
+}
+

@@ -1,0 +1,18 @@
+{
+  "name": "@anointed-pages/style-registry",
+  "version": "1.0.0",
+  "description": "InDesign-compatible style registry with 1:1 mapping",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "styles",
+    "indesign",
+    "publishing"
+  ],
+  "author": "Anointed Pages Publishing",
+  "license": "ISC"
+}
+

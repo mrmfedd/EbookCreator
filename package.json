@@ -1,34 +1,38 @@
 {
-  "name": "ebookpro",
+  "name": "anointed-pages-publishing",
   "version": "1.0.0",
-  "description": "Private AI manuscript formatting application",
-  "main": "server/index.js",
+  "description": "Professional ebook creation platform with InDesign round-trip workflows",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "nodemon server/index.js",
-    "client": "cd client && npm start",
-    "build": "cd client && npm run build",
-    "install-all": "npm install && cd client && npm install"
+    "dev": "npm run dev --workspaces",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "clean": "npm run clean --workspaces && rm -rf node_modules"
   },
-  "keywords": ["ebook", "manuscript", "formatting", "ai"],
-  "author": "",
-  "license": "MIT",
-  "dependencies": {
-    "express": "^4.18.2",
-    "multer": "^1.4.5-lts.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "mammoth": "^1.6.0",
-    "pdf-parse": "^1.1.1",
-    "openai": "^4.20.0",
-    "docx": "^8.2.2",
-    "puppeteer": "^21.5.0",
-    "epub-gen": "^0.1.0",
-    "fs-extra": "^11.1.1",
-    "path": "^0.12.7"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michaelfedd/EbookPro.git"
+  },
+  "keywords": [
+    "publishing",
+    "ebook",
+    "indesign",
+    "kdp",
+    "epub",
+    "manuscript"
+  ],
+  "author": "Anointed Pages Publishing",
+  "license": "ISC",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1",
     "concurrently": "^8.2.2"
   }
 }

@@ -1,0 +1,24 @@
+{
+  "name": "@anointed-pages/exporters",
+  "version": "1.0.0",
+  "description": "EPUB, PDF, DOCX, IDML exporters",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "export",
+    "epub",
+    "pdf",
+    "docx",
+    "idml"
+  ],
+  "author": "Anointed Pages Publishing",
+  "license": "ISC",
+  "dependencies": {
+    "yazl": "^2.5.1",
+    "adm-zip": "^0.5.10"
+  }
+}
+

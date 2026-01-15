@@ -1,0 +1,19 @@
+{
+  "name": "@anointed-pages/sermon-engine",
+  "version": "1.0.0",
+  "description": "Sermon-to-book transformation pipeline",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "sermon",
+    "transcription",
+    "book",
+    "conversion"
+  ],
+  "author": "Anointed Pages Publishing",
+  "license": "ISC"
+}
+
