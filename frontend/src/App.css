@@ -190,6 +190,12 @@
   padding: 0;
 }
 
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .section-add-button:disabled {
   color: #9ca3af;
   cursor: not-allowed;

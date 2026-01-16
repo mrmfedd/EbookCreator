@@ -453,8 +453,8 @@ function App() {
     }
   }
 
-  const addChapterManual = async (section) => {
-    if (!manuscript?.id) return
+  const createChapter = async ({ section, title }) => {
+    if (!manuscript?.id) return null
     const block = {
       id: makeLocalId('block'),
       type: 'paragraph',
@@ -462,34 +462,62 @@ function App() {
       styleId: getDefaultParagraphStyleId(),
       spans: []
     }
-    try {
-      const res = await fetch(`/api/engine/manuscript/${manuscript.id}/chapters`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title:
-            section === 'front'
-              ? 'Front Matter'
-              : section === 'back'
-                ? 'Back Matter'
-                : 'New Chapter',
-          section,
-          blocks: [block]
-        })
+    const res = await fetch(`/api/engine/manuscript/${manuscript.id}/chapters`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title,
+        section,
+        blocks: [block]
       })
-      const text = await res.text()
-      if (!res.ok) throw new Error(text || 'Create chapter failed')
-      const data = text ? JSON.parse(text) : {}
-      if (data.chapter) {
+    })
+    const text = await res.text()
+    if (!res.ok) throw new Error(text || 'Create chapter failed')
+    const data = text ? JSON.parse(text) : {}
+    return data.chapter || null
+  }
+
+  const addChapterManual = async (section) => {
+    const title =
+      section === 'front'
+        ? 'Front Matter'
+        : section === 'back'
+          ? 'Back Matter'
+          : 'New Chapter'
+    try {
+      const chapter = await createChapter({ section, title })
+      if (chapter) {
         setManuscript((prev) => ({
           ...prev,
-          chapters: [...(prev?.chapters || []), data.chapter]
+          chapters: [...(prev?.chapters || []), chapter]
         }))
-        setActiveChapterId(data.chapter.id)
-        reorderChaptersBySection([...(manuscript.chapters || []), data.chapter])
+        setActiveChapterId(chapter.id)
+        reorderChaptersBySection([...(manuscript.chapters || []), chapter])
       }
     } catch (error) {
       setEditorStatus(`Create chapter failed. ${error.message}`)
+    }
+  }
+
+  const seedFrontMatter = async () => {
+    if (!manuscript?.id) return
+    const titles = ['Title Page', 'Copyright', 'Contents']
+    const created = []
+    try {
+      for (const title of titles) {
+        const chapter = await createChapter({ section: 'front', title })
+        if (chapter) created.push(chapter)
+      }
+      if (created.length) {
+        setManuscript((prev) => ({
+          ...prev,
+          chapters: [...(prev?.chapters || []), ...created]
+        }))
+        setActiveChapterId(created[0].id)
+        reorderChaptersBySection([...(manuscript.chapters || []), ...created])
+      }
+    } catch (error) {
+      setEditorStatus(`Seed failed. ${error.message}`)
     }
   }
 
@@ -922,14 +950,24 @@ function App() {
           <div className="sidebar-section">
             <div className="sidebar-section-header">
               <span>Front Matter</span>
-              <button
-                type="button"
-                className="section-add-button"
-                onClick={() => addChapterManual('front')}
-                disabled={!manuscript}
-              >
-                + Add
-              </button>
+              <div className="section-actions">
+                <button
+                  type="button"
+                  className="section-add-button"
+                  onClick={seedFrontMatter}
+                  disabled={!manuscript}
+                >
+                  Seed
+                </button>
+                <button
+                  type="button"
+                  className="section-add-button"
+                  onClick={() => addChapterManual('front')}
+                  disabled={!manuscript}
+                >
+                  + Add
+                </button>
+              </div>
             </div>
             <ul className="sidebar-list">
               {frontMatter.length === 0 ? (
