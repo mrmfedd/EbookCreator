@@ -12,6 +12,7 @@ const addChapter = (manuscript, chapterInput = {}) => {
     id: makeId('chapter'),
     title: chapterInput.title || 'Untitled Chapter',
     subtitle: chapterInput.subtitle || '',
+    section: chapterInput.section || 'body',
     blocks: chapterInput.blocks || [],
     order: manuscript.chapters.length + 1
   };
@@ -54,7 +55,8 @@ const updateChapter = (manuscript, chapterId, updates = {}) => {
   Object.assign(chapter, {
     title: updates.title ?? chapter.title,
     subtitle: updates.subtitle ?? chapter.subtitle,
-    blocks: updates.blocks ?? chapter.blocks
+    blocks: updates.blocks ?? chapter.blocks,
+    section: updates.section ?? chapter.section
   });
   return chapter;
 };

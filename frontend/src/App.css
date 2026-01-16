@@ -176,6 +176,23 @@
   margin-bottom: 0.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-add-button {
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  font-size: 0.7rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.section-add-button:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
 }
 
 .book-details {
@@ -288,6 +305,26 @@
   margin: 0 0 2rem 0;
   padding-bottom: 1rem;
   border-bottom: 2px solid #e5e7eb;
+}
+
+.chapter-title-input {
+  width: 100%;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  border: none;
+  border-bottom: 2px solid #e5e7eb;
+  padding: 0 0 1rem 0;
+  margin: 0 0 1.5rem 0;
+  outline: none;
+}
+
+.chapter-title-input:focus {
+  border-color: #3b82f6;
+}
+
+.chapter-actions {
+  margin-bottom: 1rem;
 }
 
 .editor-block {

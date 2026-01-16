@@ -32,6 +32,12 @@ function App() {
   const [exportWarnings, setExportWarnings] = useState([])
   const [exportMenuOpen, setExportMenuOpen] = useState(false)
 
+  const makeLocalId = (prefix = 'block') =>
+    `${prefix}-${Math.random().toString(36).slice(2, 10)}`
+
+  const getDefaultParagraphStyleId = () =>
+    engineStyles.find((s) => s.type === 'paragraph')?.id || 'paragraph-default'
+
   const refreshUploads = () => {
     fetch('/api/uploads')
       .then((res) => res.json())
@@ -41,6 +47,31 @@ function App() {
         }
       })
       .catch(() => {})
+  }
+
+  const createNewManuscript = async () => {
+    try {
+      const res = await fetch('/api/engine/manuscript', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      })
+      const text = await res.text()
+      if (!res.ok) throw new Error(text || 'Create failed')
+      const data = text ? JSON.parse(text) : {}
+      if (data.manuscript) {
+        setManuscript(data.manuscript)
+        const stylesRes = await fetch(
+          `/api/engine/manuscript/${data.manuscript.id}/styles`
+        )
+        const stylesData = await stylesRes.json()
+        setEngineStyles(stylesData.styles || [])
+        setActiveChapterId('all')
+        setActiveTab('writing')
+      }
+    } catch (error) {
+      setEditorStatus(`Create failed. ${error.message}`)
+    }
   }
 
   const updateManuscriptLocal = (updates) => {
@@ -393,6 +424,124 @@ function App() {
     pushUndo({ manuscript, engineStyles })
     setManuscript(next)
     persistBlock(chapterId, block)
+  }
+
+  const reorderChaptersBySection = async (nextChapters) => {
+    if (!manuscript?.id) return
+    const ordered = [...nextChapters].sort((a, b) => (a.order || 0) - (b.order || 0))
+    const front = ordered.filter((c) => c.section === 'front')
+    const body = ordered.filter((c) => c.section !== 'front' && c.section !== 'back')
+    const back = ordered.filter((c) => c.section === 'back')
+    const orderedIds = [...front, ...body, ...back].map((c) => c.id)
+    try {
+      const res = await fetch(
+        `/api/engine/manuscript/${manuscript.id}/chapters/reorder`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderedIds })
+        }
+      )
+      const text = await res.text()
+      if (!res.ok) throw new Error(text || 'Reorder failed')
+      const data = text ? JSON.parse(text) : {}
+      if (Array.isArray(data.chapters)) {
+        setManuscript((prev) => ({ ...prev, chapters: data.chapters }))
+      }
+    } catch (error) {
+      setEditorStatus(`Reorder failed. ${error.message}`)
+    }
+  }
+
+  const addChapterManual = async (section) => {
+    if (!manuscript?.id) return
+    const block = {
+      id: makeLocalId('block'),
+      type: 'paragraph',
+      text: '',
+      styleId: getDefaultParagraphStyleId(),
+      spans: []
+    }
+    try {
+      const res = await fetch(`/api/engine/manuscript/${manuscript.id}/chapters`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title:
+            section === 'front'
+              ? 'Front Matter'
+              : section === 'back'
+                ? 'Back Matter'
+                : 'New Chapter',
+          section,
+          blocks: [block]
+        })
+      })
+      const text = await res.text()
+      if (!res.ok) throw new Error(text || 'Create chapter failed')
+      const data = text ? JSON.parse(text) : {}
+      if (data.chapter) {
+        setManuscript((prev) => ({
+          ...prev,
+          chapters: [...(prev?.chapters || []), data.chapter]
+        }))
+        setActiveChapterId(data.chapter.id)
+        reorderChaptersBySection([...(manuscript.chapters || []), data.chapter])
+      }
+    } catch (error) {
+      setEditorStatus(`Create chapter failed. ${error.message}`)
+    }
+  }
+
+  const updateChapterLocal = (chapterId, updates) => {
+    if (!manuscript) return
+    setManuscript((prev) => ({
+      ...prev,
+      chapters: prev.chapters.map((chapter) =>
+        chapter.id === chapterId ? { ...chapter, ...updates } : chapter
+      )
+    }))
+  }
+
+  const persistChapter = async (chapterId, updates) => {
+    if (!manuscript?.id) return
+    try {
+      const res = await fetch(
+        `/api/engine/manuscript/${manuscript.id}/chapters/${chapterId}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates)
+        }
+      )
+      const text = await res.text()
+      if (!res.ok) throw new Error(text || 'Update chapter failed')
+      const data = text ? JSON.parse(text) : {}
+      if (data.chapter) {
+        setManuscript((prev) => ({
+          ...prev,
+          chapters: prev.chapters.map((chapter) =>
+            chapter.id === data.chapter.id ? data.chapter : chapter
+          )
+        }))
+      }
+    } catch (error) {
+      setEditorStatus(`Update chapter failed. ${error.message}`)
+    }
+  }
+
+  const addBlockToChapter = async (chapter) => {
+    if (!manuscript?.id || !chapter) return
+    const block = {
+      id: makeLocalId('block'),
+      type: 'paragraph',
+      text: '',
+      styleId: getDefaultParagraphStyleId(),
+      spans: []
+    }
+    const nextBlocks = [...(chapter.blocks || []), block]
+    updateChapterLocal(chapter.id, { blocks: nextBlocks })
+    persistChapter(chapter.id, { blocks: nextBlocks })
   }
 
   const moveChapter = (index, direction) => {
@@ -771,7 +920,17 @@ function App() {
             </div>
           </div>
           <div className="sidebar-section">
-            <div className="sidebar-section-header">Front Matter</div>
+            <div className="sidebar-section-header">
+              <span>Front Matter</span>
+              <button
+                type="button"
+                className="section-add-button"
+                onClick={() => addChapterManual('front')}
+                disabled={!manuscript}
+              >
+                + Add
+              </button>
+            </div>
             <ul className="sidebar-list">
               {frontMatter.length === 0 ? (
                 <li className="sidebar-item muted">No front matter</li>
@@ -790,7 +949,17 @@ function App() {
           </div>
 
           <div className="sidebar-section">
-            <div className="sidebar-section-header">Chapters</div>
+            <div className="sidebar-section-header">
+              <span>Chapters</span>
+              <button
+                type="button"
+                className="section-add-button"
+                onClick={() => addChapterManual('body')}
+                disabled={!manuscript}
+              >
+                + Add
+              </button>
+            </div>
             <ul className="sidebar-list">
               {bodyChapters.length === 0 ? (
                 <li className="sidebar-item muted">No chapters</li>
@@ -809,7 +978,17 @@ function App() {
           </div>
 
           <div className="sidebar-section">
-            <div className="sidebar-section-header">Back Matter</div>
+            <div className="sidebar-section-header">
+              <span>Back Matter</span>
+              <button
+                type="button"
+                className="section-add-button"
+                onClick={() => addChapterManual('back')}
+                disabled={!manuscript}
+              >
+                + Add
+              </button>
+            </div>
             <ul className="sidebar-list">
               {backMatter.length === 0 ? (
                 <li className="sidebar-item muted">No back matter</li>
@@ -907,8 +1086,15 @@ function App() {
                 {!manuscript ? (
                   <div className="editor-empty">
                     <p className="muted">
-                      Upload an IDML file and click "Import IDML" to load it into the editor.
+                      Start a new book to add chapters one at a time, or upload an IDML file.
                     </p>
+                    <button
+                      type="button"
+                      className="ghost-button"
+                      onClick={createNewManuscript}
+                    >
+                      New Book
+                    </button>
                   </div>
                 ) : (
                   (activeChapterId === 'all'
@@ -918,7 +1104,25 @@ function App() {
                       )
                   ).map((chapter) => (
                     <div key={chapter.id} className="chapter-section">
-                      <h1 className="chapter-title">{chapter.title}</h1>
+                      <input
+                        className="chapter-title-input"
+                        value={chapter.title}
+                        onChange={(e) =>
+                          updateChapterLocal(chapter.id, { title: e.target.value })
+                        }
+                        onBlur={(e) =>
+                          persistChapter(chapter.id, { title: e.target.value })
+                        }
+                      />
+                      <div className="chapter-actions">
+                        <button
+                          type="button"
+                          className="ghost-button"
+                          onClick={() => addBlockToChapter(chapter)}
+                        >
+                          + Add paragraph
+                        </button>
+                      </div>
                       {chapter.blocks.map((block) => {
                         const blockStyle = paragraphStyles.find(s => s.id === block.styleId)
                         const styleLocked = blockStyle ? (engineStyles.find(s => s.id === blockStyle.id)?.locked ?? false) : false
