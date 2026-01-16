@@ -572,39 +572,84 @@ function App() {
     const chapters = []
     const backMatter = []
 
+    const classifyFallback = (chapter) => {
+      const combined = `${chapter.title || ''} ${chapter.styleName || ''}`.toLowerCase()
+      if (
+        combined.includes('front matter') ||
+        combined.includes('title page') ||
+        combined.includes('copyright') ||
+        combined.includes('dedication') ||
+        combined.includes('preface') ||
+        combined.includes('foreword') ||
+        combined.includes('acknowledg') ||
+        combined.includes('table of contents') ||
+        combined.includes('toc')
+      ) {
+        return 'front'
+      }
+      if (
+        combined.includes('back matter') ||
+        combined.includes('appendix') ||
+        combined.includes('index') ||
+        combined.includes('glossary') ||
+        combined.includes('bibliography') ||
+        combined.includes('afterword') ||
+        combined.includes('endnotes') ||
+        combined.includes('notes') ||
+        combined.includes('about the author')
+      ) {
+        return 'back'
+      }
+      return 'body'
+    }
+
+    const isBodyCandidate = (chapter) => {
+      const title = String(chapter.title || '').trim()
+      const style = String(chapter.styleName || '').toLowerCase()
+      if (style.includes('chapter') && !style.includes('objective') && !style.includes('toc')) return true
+      if (/^chapter\s+(\d+|[ivxlcdm]+)\b/i.test(title)) return true
+      if (/^chapter[_\s-]*\d+/i.test(title)) return true
+      return false
+    }
+
+    const ordered = [...allChapters].sort((a, b) => (a.order || 0) - (b.order || 0))
+    const bodyOrders = ordered.filter(isBodyCandidate).map((c) => c.order).filter(Boolean)
+    const firstBody = bodyOrders.length ? Math.min(...bodyOrders) : null
+    const lastBody = bodyOrders.length ? Math.max(...bodyOrders) : null
+
     allChapters.forEach((chapter) => {
-      if (chapter.section === 'front') {
+      const explicitSection = chapter.section
+      if (explicitSection === 'front') {
         frontMatter.push(chapter)
         return
       }
-      if (chapter.section === 'back') {
+      if (explicitSection === 'back') {
         backMatter.push(chapter)
         return
       }
 
-      // Fallback heuristic for older imports without section
-      const titleLower = chapter.title?.toLowerCase() || ''
-      if (
-        titleLower.includes('front matter') ||
-        titleLower.includes('title page') ||
-        titleLower.includes('copyright') ||
-        titleLower.includes('dedication') ||
-        titleLower.includes('table of contents') ||
-        titleLower.includes('preface')
-      ) {
+      const fallback = classifyFallback(chapter)
+      if (fallback === 'front') {
         frontMatter.push(chapter)
-      } else if (
-        titleLower.includes('back matter') ||
-        titleLower.includes('appendix') ||
-        titleLower.includes('index') ||
-        titleLower.includes('glossary') ||
-        titleLower.includes('bibliography') ||
-        titleLower.includes('about the author')
-      ) {
-        backMatter.push(chapter)
-      } else {
-        chapters.push(chapter)
+        return
       }
+      if (fallback === 'back') {
+        backMatter.push(chapter)
+        return
+      }
+
+      if (firstBody && lastBody && typeof chapter.order === 'number') {
+        if (chapter.order < firstBody) {
+          frontMatter.push(chapter)
+          return
+        }
+        if (chapter.order > lastBody) {
+          backMatter.push(chapter)
+          return
+        }
+      }
+
+      chapters.push(chapter)
     })
 
     return { frontMatter, chapters, backMatter }

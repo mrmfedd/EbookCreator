@@ -204,9 +204,37 @@ const classifyChapterSection = (title, styleName) => {
   return 'body';
 };
 
+const isBodyChapterCandidate = (title, styleName) => {
+  const t = String(title || '').trim();
+  const s = String(styleName || '').toLowerCase();
+  const tl = t.toLowerCase();
+  if (s.includes('chapter') && !s.includes('objective') && !s.includes('toc')) return true;
+  if (/^chapter\s+(\d+|[ivxlcdm]+)\b/i.test(tl)) return true;
+  if (/^chapter[_\s-]*\d+/.test(tl)) return true;
+  return false;
+};
+
 const detectChapters = (stories) => {
   const chapters = [];
   let order = 1;
+  const isTocLike = ({ title, styleName }) => {
+    const t = String(title || '').trim();
+    const s = String(styleName || '').toLowerCase();
+    const tl = t.toLowerCase();
+    if (s.includes('toc') || s.includes('contents')) return true;
+    if (tl.includes('table of contents') || tl === 'contents' || tl === 'toc')
+      return true;
+    const occurrences = (tl.match(/\bchapter\b/g) || []).length;
+    // If a single paragraph contains multiple "Chapter" tokens, it's almost certainly TOC text.
+    if (occurrences >= 2) return true;
+    // Common TOC concatenation pattern: "Chapter 1 ... 15Chapter 2 ... 21"
+    if (/\bchapter\s+\d+.*\d+\s*chapter\s+\d+/i.test(t)) return true;
+    return false;
+  };
+
+  const isChapterText = (text) =>
+    /^chapter\s+(\d+|[ivxlcdm]+)\b/i.test(String(text || '').trim());
+
   stories.forEach((story) => {
     if (!story.parsed) return;
     const ranges = collectParagraphRanges(story.parsed);
@@ -215,9 +243,16 @@ const detectChapters = (stories) => {
       const text = extractText(range.Content || range).trim();
       const isChapterStyle = /chapter/i.test(styleName);
       const isHeading = /heading|title/i.test(styleName);
-      const isChapterText = /^chapter\b/i.test(text);
+      const isChapterLine = isChapterText(text);
       const pageBreak = hasPageBreak(range);
-      if (isChapterStyle || isChapterText || (pageBreak && isHeading)) {
+      // Avoid misclassifying TOC paragraphs and "Chapter Objective" as chapters.
+      if (
+        styleName.toLowerCase().includes('objective') ||
+        isTocLike({ title: text, styleName })
+      ) {
+        return;
+      }
+      if (isChapterStyle || isChapterLine || (pageBreak && isHeading)) {
         const section = classifyChapterSection(text, styleName);
         chapters.push({
           id: `chapter-${order}`,
@@ -230,6 +265,18 @@ const detectChapters = (stories) => {
       }
     });
   });
+  const bodyOrders = chapters
+    .filter((ch) => ch.section === 'body' && isBodyChapterCandidate(ch.title, ch.styleName))
+    .map((ch) => ch.order);
+  if (bodyOrders.length) {
+    const firstBody = Math.min(...bodyOrders);
+    const lastBody = Math.max(...bodyOrders);
+    chapters.forEach((ch) => {
+      if (ch.section !== 'body') return;
+      if (ch.order < firstBody) ch.section = 'front';
+      if (ch.order > lastBody) ch.section = 'back';
+    });
+  }
   return chapters;
 };
 
